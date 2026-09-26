@@ -217,7 +217,8 @@ pushd "$CURL_BUILD_DIR"
             cmake --install . --config Release
 
             # conditionally run unit tests
-            if [ "${DISABLE_UNIT_TESTS:-0}" = "0" ]; then
+            # (curl 8 is configured with BUILD_TESTING=OFF, so there is no tests dir.)
+            if [ "${DISABLE_UNIT_TESTS:-0}" = "0" ] && [ -d tests ]; then
                 pushd tests
                 # Nothin' to do yet
                 popd
