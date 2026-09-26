@@ -64,6 +64,9 @@ build_sln() {
 # HTTP and HTTPS only (the viewer uses nothing else; Firestorm's curl 8 build did the same),
 # static OpenSSL 3 / zlib-ng / nghttp2 from our own packages by explicit path, and none of
 # curl's optional extras, so nothing is picked up from the build machine.
+# (Windows/MSVC: CMake's FindOpenSSL ignores OPENSSL_*_LIBRARY there and searches
+# OPENSSL_ROOT_DIR/lib... for LIB_EAY_RELEASE / SSL_EAY_RELEASE itself, which never finds
+# our lib/release — cmake-3.31 Modules/FindOpenSSL.cmake — so those are set too.)
 curl_common_args=(
     -DCURL_ENABLE_SSL:BOOL=ON
     -DCURL_USE_OPENSSL:BOOL=ON
@@ -202,6 +205,8 @@ pushd "$CURL_BUILD_DIR"
                 -DOPENSSL_INCLUDE_DIR:PATH="$packages/include" \
                 -DOPENSSL_CRYPTO_LIBRARY:FILEPATH="$packages/lib/release/libcrypto.lib" \
                 -DOPENSSL_SSL_LIBRARY:FILEPATH="$packages/lib/release/libssl.lib" \
+                -DLIB_EAY_RELEASE:FILEPATH="$packages/lib/release/libcrypto.lib" \
+                -DSSL_EAY_RELEASE:FILEPATH="$packages/lib/release/libssl.lib" \
                 -DZLIB_INCLUDE_DIR:PATH="$packages/include/zlib-ng" \
                 -DZLIB_LIBRARY:FILEPATH="$packages/lib/release/zlib.lib" \
                 -DCMAKE_INSTALL_PREFIX="$(cygpath -m "$stage")"
