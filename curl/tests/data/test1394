@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,20 +6,16 @@ unittest
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>
- <name>
+<name>
 unit test for parse_cert_parameter()
- </name>
+</name>
 <tool>
-unit1394
+tool%TESTNUMBER
 </tool>
 </client>
 
@@ -26,5 +23,4 @@ unit1394
 <stdout mode="text">
 </stdout>
 </verify>
-
 </testcase>

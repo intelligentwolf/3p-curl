@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,21 +7,13 @@ hash
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>
- <name>
+<name>
 Internal hash create/add/destroy testing, exercising clean functions
- </name>
-<tool>
-unit1602
-</tool>
+</name>
 </client>
-
 </testcase>

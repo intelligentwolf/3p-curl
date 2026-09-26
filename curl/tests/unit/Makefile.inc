@@ -1,79 +1,111 @@
-# these files are used in every single unit test program
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
+#
+###########################################################################
+# Shared between CMakeLists.txt and Makefile.am
 
-UNITFILES = curlcheck.h \
- ../libtest/test.h \
- ../libtest/first.c
+BUNDLE = units
 
-# These are all unit test programs
-UNITPROGS = unit1300 unit1301 unit1302 unit1303 unit1304 unit1305 unit1307	\
- unit1308 unit1309 unit1330 unit1394 unit1395 unit1396 unit1397 unit1398	\
- unit1600 unit1601 unit1602 unit1603 unit1604 unit1605 unit1606
+# Files referenced from the bundle source
+FIRST_C = ../libtest/first.c
 
-unit1300_SOURCES = unit1300.c $(UNITFILES)
-unit1300_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1301_SOURCES = unit1301.c $(UNITFILES)
-unit1301_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1302_SOURCES = unit1302.c $(UNITFILES)
-unit1302_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1303_SOURCES = unit1303.c $(UNITFILES)
-unit1303_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1304_SOURCES = unit1304.c $(UNITFILES)
-unit1304_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1305_SOURCES = unit1305.c $(UNITFILES)
-unit1305_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1307_SOURCES = unit1307.c $(UNITFILES)
-unit1307_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1308_SOURCES = unit1308.c $(UNITFILES)
-unit1308_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1309_SOURCES = unit1309.c $(UNITFILES)
-unit1309_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1330_SOURCES = unit1330.c $(UNITFILES)
-unit1330_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1394_SOURCES = unit1394.c $(UNITFILES)
-unit1394_CPPFLAGS = $(AM_CPPFLAGS) $(LIBMETALINK_CPPFLAGS)
-unit1394_LDADD = @LIBMETALINK_LIBS@ $(top_builddir)/lib/libcurl.la @LIBCURL_LIBS@
-unit1394_LDFLAGS = @LIBMETALINK_LDFLAGS@ $(top_builddir)/src/libcurltool.la
-unit1394_LIBS =
-
-unit1395_SOURCES = unit1395.c $(UNITFILES)
-unit1395_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1396_SOURCES = unit1396.c $(UNITFILES)
-unit1396_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1397_SOURCES = unit1397.c $(UNITFILES)
-unit1397_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1398_SOURCES = unit1398.c $(UNITFILES)
-unit1398_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1600_SOURCES = unit1600.c $(UNITFILES)
-unit1600_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1601_SOURCES = unit1601.c $(UNITFILES)
-unit1601_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1602_SOURCES = unit1602.c $(UNITFILES)
-unit1602_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1603_SOURCES = unit1603.c $(UNITFILES)
-unit1603_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1604_SOURCES = unit1604.c $(UNITFILES)
-unit1604_CPPFLAGS = $(AM_CPPFLAGS) $(LIBMETALINK_CPPFLAGS)
-
-unit1605_SOURCES = unit1605.c $(UNITFILES)
-unit1605_CPPFLAGS = $(AM_CPPFLAGS)
-
-unit1606_SOURCES = unit1606.c $(UNITFILES)
-unit1606_CPPFLAGS = $(AM_CPPFLAGS)
+# All unit test programs
+TESTS_C = \
+  unit1300.c \
+  unit1302.c \
+  unit1303.c \
+  unit1304.c \
+  unit1305.c \
+  unit1307.c \
+  unit1309.c \
+  unit1323.c \
+  unit1330.c \
+  unit1395.c \
+  unit1397.c \
+  unit1399.c \
+  unit1600.c \
+  unit1601.c \
+  unit1602.c \
+  unit1603.c \
+  unit1605.c \
+  unit1606.c \
+  unit1607.c \
+  unit1608.c \
+  unit1609.c \
+  unit1610.c \
+  unit1611.c \
+  unit1612.c \
+  unit1614.c \
+  unit1615.c \
+  unit1616.c \
+  unit1620.c \
+  unit1625.c \
+  unit1626.c \
+  unit1627.c \
+  unit1636.c \
+  unit1650.c \
+  unit1651.c \
+  unit1652.c \
+  unit1653.c \
+  unit1654.c \
+  unit1655.c \
+  unit1656.c \
+  unit1657.c \
+  unit1658.c \
+  unit1660.c \
+  unit1661.c \
+  unit1663.c \
+  unit1664.c \
+  unit1666.c \
+  unit1667.c \
+  unit1668.c \
+  unit1669.c \
+  unit1674.c \
+  unit1675.c \
+  unit1676.c \
+  unit1961.c \
+  unit1979.c \
+  unit1980.c \
+  unit2413.c \
+  unit2600.c \
+  unit2601.c \
+  unit2602.c \
+  unit2603.c \
+  unit2604.c \
+  unit2605.c \
+  unit2606.c \
+  unit3200.c \
+  unit3205.c \
+  unit3211.c \
+  unit3212.c \
+  unit3213.c \
+  unit3214.c \
+  unit3216.c \
+  unit3219.c \
+  unit3227.c \
+  unit3300.c \
+  unit3301.c \
+  unit3302.c \
+  unit3303.c \
+  unit3304.c \
+  unit3306.c \
+  unit3400.c

@@ -1,42 +1,29 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 HTTP
 HTTP GET
-pipelining
-multi
+HTTP proxy
+CURLOPT_PROXY
+CURLOPT_NOBODY
+CURLINFO_USED_PROXY
 </keywords>
 </info>
 
+# Server-side
 <reply>
-<data>
-HTTP/1.1 404 Badness
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 200 OK swsclose
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
 Content-Length: 6
-Content-Type: text/html
-Funny-head: yesyes
 
-hejsan
+hello
 </data>
-<data1>
-HTTP/1.1 200 Fine
-Date: Thu, 09 Nov 2010 14:49:00 GMT
-Content-Length: 13
-Connection: close
-Content-Type: text/html
-
-fine content
-</data1>
-
-<datacheck>
-fine content
-Finished!
-</datacheck>
-
-<servercmd>
-pipe: 1
-</servercmd>
 </reply>
 
 # Client-side
@@ -44,31 +31,43 @@ pipe: 1
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 <tool>
-lib536
+lib%TESTNUMBER
 </tool>
+<name>
+CURLINFO_USED_PROXY
+</name>
 
- <name>
-HTTP GET multi two files with FAILONERROR and pipelining
- </name>
- <command>
-http://%HOSTIP:%HTTPPORT/536 http://%HOSTIP:%HTTPPORT/5360001
+# provides:
+# 0 - the proxy URL
+# 1 - the non-proxy using URL
+# 2 - the CURLOPT_RESOLVE string to change IP for the name
+<command>
+http://%HOSTIP:%HTTPPORT goingdirect.test:%HTTPPORT goingdirect.test:%HTTPPORT:%HOSTIP
 </command>
+<features>
+proxy
+</features>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-GET /536 HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
+<protocol crlf="headers">
+GET http://usingproxy.test/ HTTP/1.1
+Host: usingproxy.test
 Accept: */*
+Proxy-Connection: Keep-Alive
 
-GET /5360001 HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
+GET / HTTP/1.1
+Host: goingdirect.test:%HTTPPORT
 Accept: */*
 
 </protocol>
+<stdout mode="text">
+hello
+This used the proxy
+hello
+This DID NOT use the proxy
+</stdout>
 </verify>
 </testcase>

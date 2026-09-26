@@ -60,6 +60,40 @@ build_sln() {
         -p:PlatformToolset=$toolset
 }
 
+# IntelligentWolf 2026-09-26: curl 8.22.0. Option names from curl-8.22.0/CMakeLists.txt.
+# HTTP and HTTPS only (the viewer uses nothing else; Firestorm's curl 8 build did the same),
+# static OpenSSL 3 / zlib-ng / nghttp2 from our own packages by explicit path, and none of
+# curl's optional extras, so nothing is picked up from the build machine.
+curl_common_args=(
+    -DCURL_ENABLE_SSL:BOOL=ON
+    -DCURL_USE_OPENSSL:BOOL=ON
+    -DCURL_USE_SCHANNEL:BOOL=OFF
+    -DOPENSSL_USE_STATIC_LIBS:BOOL=ON
+    -DUSE_NGHTTP2:BOOL=ON
+    -DCURL_ZLIB:STRING=ON
+    -DCURL_BROTLI:STRING=OFF
+    -DCURL_ZSTD:STRING=OFF
+    -DCURL_USE_LIBPSL:BOOL=OFF
+    -DCURL_USE_LIBSSH2:BOOL=OFF
+    -DCURL_USE_LIBSSH:BOOL=OFF
+    -DCURL_USE_GSSAPI:BOOL=OFF
+    -DUSE_LIBIDN2:BOOL=OFF
+    -DUSE_WIN32_IDN:BOOL=OFF
+    -DUSE_APPLE_IDN:BOOL=OFF
+    -DUSE_NGTCP2:BOOL=OFF
+    -DENABLE_ARES:BOOL=OFF
+    -DENABLE_THREADED_RESOLVER:BOOL=ON
+    -DHTTP_ONLY:BOOL=ON
+    -DCURL_USE_PKGCONFIG:BOOL=OFF
+    -DBUILD_SHARED_LIBS:BOOL=OFF
+    -DBUILD_STATIC_LIBS:BOOL=ON
+    -DBUILD_CURL_EXE:BOOL=ON
+    -DBUILD_TESTING:BOOL=OFF
+    -DBUILD_LIBCURL_DOCS:BOOL=OFF
+    -DBUILD_MISC_DOCS:BOOL=OFF
+    -DENABLE_CURL_MANUAL:BOOL=OFF
+)
+
 ZLIB_INCLUDE="${stage}"/packages/include/zlib-ng
 OPENSSL_INCLUDE="${stage}"/packages/include/openssl
 
@@ -106,8 +140,9 @@ check_damage ()
         ;;
 
         darwin*|linux*)
+            # curl 8: the threaded resolver is USE_RESOLV_THREADED (lib/curl_config-cmake.h.in:654)
             echo "Verifying Ares is disabled"
-            egrep 'USE_THREADS_POSIX[[:space:]]+1' lib/curl_config.h
+            grep -E 'USE_RESOLV_THREADED[[:space:]]+1' lib/curl_config.h
         ;;
     esac
 }
@@ -159,11 +194,16 @@ pushd "$CURL_BUILD_DIR"
                 -G"$AUTOBUILD_WIN_CMAKE_GEN" -A"$AUTOBUILD_WIN_VSPLATFORM" \
                 -DCMAKE_C_FLAGS:STRING="$plainopts" \
                 -DCMAKE_CXX_FLAGS:STRING="$opts" \
-                -DENABLE_THREADED_RESOLVER:BOOL=ON \
-                -DCMAKE_USE_OPENSSL:BOOL=TRUE \
-                -DUSE_NGHTTP2:BOOL=TRUE \
-                -DNGHTTP2_INCLUDE_DIR:FILEPATH="$packages/include" \
+                "${curl_common_args[@]}" \
+                -DCURL_STATIC_CRT:BOOL=OFF \
+                -DNGHTTP2_INCLUDE_DIR:PATH="$packages/include" \
                 -DNGHTTP2_LIBRARY:FILEPATH="$packages/lib/release/nghttp2.lib" \
+                -DOPENSSL_ROOT_DIR:PATH="$packages" \
+                -DOPENSSL_INCLUDE_DIR:PATH="$packages/include" \
+                -DOPENSSL_CRYPTO_LIBRARY:FILEPATH="$packages/lib/release/libcrypto.lib" \
+                -DOPENSSL_SSL_LIBRARY:FILEPATH="$packages/lib/release/libssl.lib" \
+                -DZLIB_INCLUDE_DIR:PATH="$packages/include/zlib-ng" \
+                -DZLIB_LIBRARY:FILEPATH="$packages/lib/release/zlib.lib" \
                 -DCMAKE_INSTALL_PREFIX="$(cygpath -m "$stage")"
 
             check_damage "$AUTOBUILD_PLATFORM"
@@ -239,12 +279,15 @@ pushd "$CURL_BUILD_DIR"
                     cmake "${CURL_SOURCE_DIR}" -G Ninja -DCMAKE_BUILD_TYPE=Release \
                         -DCMAKE_C_FLAGS:STRING="$cc_opts" \
                         -DCMAKE_CXX_FLAGS:STRING="$cxx_opts" \
-                        -DBUILD_SHARED_LIBS:BOOL=OFF \
-                        -DENABLE_THREADED_RESOLVER:BOOL=ON \
-                        -DCMAKE_USE_OPENSSL:BOOL=TRUE \
-                        -DUSE_NGHTTP2:BOOL=TRUE \
-                        -DNGHTTP2_INCLUDE_DIR:FILEPATH="$stage/packages/include" \
+                        "${curl_common_args[@]}" \
+                        -DNGHTTP2_INCLUDE_DIR:PATH="$stage/packages/include" \
                         -DNGHTTP2_LIBRARY:FILEPATH="$stage/packages/lib/release/libnghttp2.a" \
+                        -DOPENSSL_ROOT_DIR:PATH="$stage/packages" \
+                        -DOPENSSL_INCLUDE_DIR:PATH="$stage/packages/include" \
+                        -DOPENSSL_CRYPTO_LIBRARY:FILEPATH="$stage/packages/lib/release/libcrypto.a" \
+                        -DOPENSSL_SSL_LIBRARY:FILEPATH="$stage/packages/lib/release/libssl.a" \
+                        -DZLIB_INCLUDE_DIR:PATH="$stage/packages/include/zlib-ng" \
+                        -DZLIB_LIBRARY:FILEPATH="$stage/packages/lib/release/libz.a" \
                         -DCMAKE_INSTALL_PREFIX="$stage" \
                         -DCMAKE_INSTALL_LIBDIR="$stage/lib/release/$arch" \
                         -DCMAKE_OSX_ARCHITECTURES="$arch" \
@@ -335,12 +378,15 @@ pushd "$CURL_BUILD_DIR"
             cmake "${CURL_SOURCE_DIR}" -G"Ninja" -DCMAKE_BUILD_TYPE=Release \
                 -DCMAKE_C_FLAGS:STRING="$plainopts" \
                 -DCMAKE_CXX_FLAGS:STRING="$opts" \
-                -DENABLE_THREADED_RESOLVER:BOOL=ON \
-                -DCMAKE_USE_OPENSSL:BOOL=TRUE \
-                -DUSE_NGHTTP2:BOOL=TRUE \
-                -DNGHTTP2_INCLUDE_DIR:FILEPATH="$stage/packages/include" \
+                "${curl_common_args[@]}" \
+                -DNGHTTP2_INCLUDE_DIR:PATH="$stage/packages/include" \
                 -DNGHTTP2_LIBRARY:FILEPATH="$stage/packages/lib/release/libnghttp2.a" \
-                -DBUILD_SHARED_LIBS:BOOL=FALSE \
+                -DOPENSSL_ROOT_DIR:PATH="$stage/packages" \
+                -DOPENSSL_INCLUDE_DIR:PATH="$stage/packages/include" \
+                -DOPENSSL_CRYPTO_LIBRARY:FILEPATH="$stage/packages/lib/release/libcrypto.a" \
+                -DOPENSSL_SSL_LIBRARY:FILEPATH="$stage/packages/lib/release/libssl.a" \
+                -DZLIB_INCLUDE_DIR:PATH="$stage/packages/include/zlib-ng" \
+                -DZLIB_LIBRARY:FILEPATH="$stage/packages/lib/release/libz.a" \
                 -DCMAKE_INSTALL_PREFIX=$stage
 
             check_damage "$AUTOBUILD_PLATFORM"
